@@ -4,11 +4,6 @@ class MongoClient {
     constructor() {
         // Configuring the URL of MongoDB connection
         this.mongoURL = `mongodb://${process.env.MONGO_INITDB_ROOT_USERNAME}:${process.env.MONGO_INITDB_ROOT_PASSWORD}@${process.env.MONGO_IP}:27017/catalog?authSource=admin`;
-        this.db = mongoose.connection.db;
-    }
-
-    async createCollection(collectionName) {
-        await mongoose.connection.db.createCollection(collectionName);
     }
 
     async connectMongo() {
@@ -25,13 +20,74 @@ class MongoClient {
         }
     }
 
+    async createCollection(collectionName) {
+        try {
+            await mongoose.connection.db.createCollection(collectionName);
+            console.log(`Collection '${collectionName}' created successfully.`);
+        } catch (error) {
+            console.error("Error creating collection:", error);
+            throw error;
+        }
+    }
+
     async insertDocument(collectionName, document) {
         try {
             const result = await mongoose.connection.db.collection(collectionName).insertOne(document);
-
             console.log("Document inserted successfully:", result.insertedId);
         } catch (error) {
             console.error("Error inserting document:", error);
+            throw error;
+        }
+    }
+
+    async findDocuments(collectionName, query) {
+        try {
+            const result = await mongoose.connection.db.collection(collectionName).find(query).toArray();
+            console.log("Documents found:", result);
+            return result;
+        } catch (error) {
+            console.error("Error finding documents:", error);
+            throw error;
+        }
+    }
+
+    async updateDocument(collectionName, query, update) {
+        try {
+            const result = await mongoose.connection.db.collection(collectionName).updateOne(query, { $set: update });
+            console.log("Document updated successfully:", result.modifiedCount);
+        } catch (error) {
+            console.error("Error updating document:", error);
+            throw error;
+        }
+    }
+
+    async deleteDocument(collectionName, query) {
+        try {
+            const result = await mongoose.connection.db.collection(collectionName).deleteOne(query);
+            console.log("Document deleted successfully:", result.deletedCount);
+        } catch (error) {
+            console.error("Error deleting document:", error);
+            throw error;
+        }
+    }
+
+    async getAllDocuments(collectionName) {
+        try {
+            const result = await mongoose.connection.db.collection(collectionName).find({}).toArray();
+            console.log("All documents:", result);
+            return result;
+        } catch (error) {
+            console.error("Error getting all documents:", error);
+            throw error;
+        }
+    }
+
+    async deleteAllDocuments(collectionName) {
+        try {
+            const result = await mongoose.connection.db.collection(collectionName).deleteMany({});
+            console.log("Documents deleted successfully:", result.deletedCount);
+        } catch (error) {
+            console.error("Error deleting documents:", error);
             throw error;
         }
     }
@@ -43,4 +99,3 @@ class MongoClient {
 }
 
 module.exports = MongoClient;
-
