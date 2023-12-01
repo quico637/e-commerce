@@ -1,0 +1,47 @@
+version: '3.8'
+services:
+ mongodb:
+  # container_name: mongo_container
+  image: mongo:latest 
+  ports:
+   - 27017:27017
+  environment:
+    MONGO_INITDB_ROOT_USERNAME: "root"
+    MONGO_INITDB_ROOT_PASSWORD: "mymongodb"
+    MONGO_INITDB_DATABASE: "test"
+  volumes: 
+   - ./data/mongo_data:/data/db
+ redis:
+  # container_name: redis_container
+  image: redis:latest
+  ports:
+   - 6379:6379 
+  volumes:
+   - ./data/redis_data:/data/db
+ postgres:
+  #  container_name: postgress_container
+   image: postgres:latest
+   ports: 
+    - 5432:5432
+   environment:
+    POSTGRES_USER : "admin"
+    POSTGRES_PASSWORD: "mypostgres"
+    POSTGRES_DB: "orders"
+   volumes:
+    - ./data/postgres_data:/var/lib/postgresql/data      
+ app:
+  # container_name: app_container
+  image: node
+  ports:
+   - 3000:3000
+  environment:
+    APP_IP: "localhost"
+    PORT: 3000
+    MONGO_IP : "mongodb"
+    MONGO_INITDB_ROOT_USERNAME: "root"
+    MONGO_INITDB_ROOT_PASSWORD: "mymongodb"
+  command: "npm start"
+  working_dir: /usr/src/app
+  volumes: 
+   - ./app:/usr/src/app
+
