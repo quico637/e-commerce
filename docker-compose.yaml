@@ -11,7 +11,7 @@ services:
     MONGO_INITDB_DATABASE: "test"
   volumes: 
    - ./data/mongo_data:/data/db
- redis:
+ redis-cache:
   # container_name: redis_container
   image: redis:latest
   ports:
@@ -37,9 +37,12 @@ services:
   environment:
     APP_IP: "localhost"
     PORT: 3000
-    MONGO_IP : "mongodb"
+    MONGO_HOST : "mongodb"
     MONGO_INITDB_ROOT_USERNAME: "root"
     MONGO_INITDB_ROOT_PASSWORD: "mymongodb"
+    REDIS_HOST : redis-cache
+    REDIS_TTL : 30
+    REDIS_TIMEOUT : 5000
   command: "npm start"
   working_dir: /usr/src/app
   volumes: 

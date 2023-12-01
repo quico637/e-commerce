@@ -5,7 +5,6 @@ const app = express();
 
 const product = require('./routes/ProductRoutes')
 
-
 // Configura el middleware de análisis del cuerpo de la solicitud
 app.use(bodyParser.json());
 

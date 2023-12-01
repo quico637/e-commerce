@@ -1,5 +1,6 @@
 
 const MongoClient = require('../clients/MongoClient');
+const { setCache } = require('../clients/RedisClient')
 
 class ProductService {
     constructor() {
@@ -38,13 +39,17 @@ class ProductService {
     };
     
     getProductById = async (req, res) => {
-        // try {
-        //     const product = await Product.findById(req.params.id);
-        //     if (!product) res.status(404).json({ message: "Producto no encontrado" });
-        //     res.json(product);
-        // } catch (error) {
-        //     res.status(500).json({ message: error.message });
-        // }
+        try {
+            const { id } = req.params;
+            // console.log(`iddddd -- ----- -- - ${id} `)
+            const doc = await this.mongoClient.findDocumentById(this.collection_name, id);
+
+            const cacheKey = `product:${id}`;
+            setCache(cacheKey, doc);
+            res.status(200).send(doc);
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+        }
     };
     
     deleteAllProducts = async (req, res) => {

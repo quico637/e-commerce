@@ -1,9 +1,12 @@
 const mongoose = require('mongoose');
+const { ObjectId } = require('mongodb');
+
+const { MONGO_INITDB_ROOT_USERNAME, MONGO_INITDB_ROOT_PASSWORD, MONGO_HOST} = process.env;
 
 class MongoClient {
     constructor() {
         // Configuring the URL of MongoDB connection
-        this.mongoURL = `mongodb://${process.env.MONGO_INITDB_ROOT_USERNAME}:${process.env.MONGO_INITDB_ROOT_PASSWORD}@${process.env.MONGO_IP}:27017/catalog?authSource=admin`;
+        this.mongoURL = `mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@${MONGO_HOST}:27017/catalog?authSource=admin`;
     }
 
     async connectMongo() {
@@ -50,6 +53,25 @@ class MongoClient {
             throw error;
         }
     }
+
+    async findDocumentById(collectionName, documentId) {
+        try {
+            console.log(`idddddd22222 --------------- ${documentId.toString()}`)
+            const result = await mongoose.connection.db.collection(collectionName).findOne({ "_id" : new ObjectId(documentId)});
+
+            if (result) {
+                console.log("Document found:", result);
+                return result;
+            } else {
+                console.log("Document not found");
+                return null;
+            }
+        } catch (error) {
+            console.error("Error finding document by ID:", error);
+            throw error;
+        }
+    }
+
 
     async updateDocument(collectionName, query, update) {
         try {
