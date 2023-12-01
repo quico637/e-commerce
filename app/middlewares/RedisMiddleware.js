@@ -2,8 +2,8 @@ const { redis } = require('../clients/RedisClient')
 
 exports.cacheMiddleware = async (req, res, next) => {
     try {
-        const { id } = req.params;
-        const cacheKey = `product:${id}`;
+        const { name } = req.params;
+        const cacheKey = `product:${name}`;
         // Intenta obtener el producto del caché de Redis
         const cachedProduct = await redis.get(cacheKey);
         
