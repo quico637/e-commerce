@@ -72,6 +72,24 @@ class MongoClient {
         }
     }
 
+    async findDocumentByName(collectionName, newName) {
+        try {
+            
+            const result = await mongoose.connection.db.collection(collectionName).findOne({ name : newName});
+
+            if (result) {
+                console.log("Document found:", result);
+                return result;
+            } else {
+                console.log("Document not found");
+                return null;
+            }
+        } catch (error) {
+            console.error("Error finding document by Name:", error);
+            throw error;
+        }
+    }
+
 
     async updateDocument(collectionName, query, update) {
         try {

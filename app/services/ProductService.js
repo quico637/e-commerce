@@ -5,16 +5,18 @@ const { setCache } = require('../clients/RedisClient')
 class ProductService {
     constructor() {
         // Configuring the URL of MongoDB connection
-        this.collection_name = "products";
+        this.collectionName = "products";
 
         this.mongoClient = new MongoClient();
-        this.mongoClient.connectMongo(this.collection_name);
-        // this.mongoClient.createCollection(this.collection_name);
+        this.mongoClient.connectMongo(this.collectionName);
+        // this.mongoClient.createCollection(this.collectionName);
     }
 
     createProduct = async (req, res) => {
         console.log("ola");
         try {
+
+            const id = req.body.name; 
             const newProduct = {
                 name: req.body.name,
                 description: req.body.description,
@@ -22,7 +24,10 @@ class ProductService {
                 stock: req.body.stock
             };
 
-            this.mongoClient.insertDocument(this.collection_name, newProduct);
+            this.mongoClient.insertDocument(this.collectionName, newProduct);
+
+            const cacheKey = `product:${id}`;
+            setCache(cacheKey, newProduct);
             res.status(201).json("ok");
         } catch (error) {
             res.status(400).json({ message: error.message });
@@ -31,7 +36,7 @@ class ProductService {
     
     getAllProducts = async (req, res) => {
         try {
-            const docs = await this.mongoClient.getAllDocuments(this.collection_name);
+            const docs = await this.mongoClient.getAllDocuments(this.collectionName);
             res.status(200).send(docs);
         } catch (error) {
             res.status(500).json({ message: error.message });
@@ -41,8 +46,8 @@ class ProductService {
     getProductById = async (req, res) => {
         try {
             const { id } = req.params;
-            // console.log(`iddddd -- ----- -- - ${id} `)
-            const doc = await this.mongoClient.findDocumentById(this.collection_name, id);
+            
+            const doc = await this.mongoClient.findDocumentById(this.collectionName, id);
 
             const cacheKey = `product:${id}`;
             setCache(cacheKey, doc);
@@ -51,10 +56,37 @@ class ProductService {
             res.status(500).json({ message: error.message });
         }
     };
+
+    updateProduct = async (req, res) => {
+        
+        try {
+
+            const { name } = req.params;
+
+            const query = {
+                name 
+            }
+
+            const updatedProduct = {
+                name: req.body.name,
+                description: req.body.description,
+                price: req.body.price,
+                stock: req.body.stock
+            };
+
+            this.mongoClient.updateDocument(this.collectionName, query, updatedProduct)
+
+            const cacheKey = `product:${name}`;
+            setCache(cacheKey, updatedProduct);
+            res.status(201).json("ok");
+        } catch (error) {
+            res.status(400).json({ message: error.message });
+        }
+    };
     
     deleteAllProducts = async (req, res) => {
         try {
-            await this.mongoClient.deleteAllDocuments(this.collection_name);
+            await this.mongoClient.deleteAllDocuments(this.collectionName);
             res.status(200).send("all products have been deleted");
         } catch (error) {
             res.status(500).json({ message: error.message });
@@ -62,18 +94,17 @@ class ProductService {
     };
     
     getProductByName = async (req, res) => {
-        // try {
-        //     const productName = req.params.name;
-        //     const product = await Product.findOne({ name: new RegExp(productName, 'i') });
+        try {
+            const { name } = req.params;
+            
+            const doc = await this.mongoClient.findDocumentByName(this.collectionName, name);
 
-        //     if (!product) {
-        //         return res.status(404).json({ message: 'Producto no encontrado' });
-        //     }
-
-        //     res.json(product);
-        // } catch (error) {
-        //     res.status(500).json({ message: 'Error al buscar el producto', error });
-        // }
+            const cacheKey = `product:${name}`;
+            setCache(cacheKey, doc);
+            res.status(200).send(doc);
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+        }
     };
 }
 

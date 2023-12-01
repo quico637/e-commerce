@@ -8,8 +8,9 @@ const productService = new ProductService();
 
 router.post('/', productService.createProduct);
 router.get('/', productService.getAllProducts);
-router.get('/:id',  redisMiddleware.cacheMiddleware, productService.getProductById);
+router.get('/:name',  redisMiddleware.cacheMiddleware, productService.getProductByName);
 router.delete('/', productService.deleteAllProducts);
 router.get('/search/:name', productService.getProductByName);
+router.put('/:name', productService.updateProduct)
 
 module.exports = router;
